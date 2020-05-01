@@ -12,14 +12,13 @@ def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
-  
-  '''
-  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
-  '''
+  CORS(app)
 
-  '''
-  @TODO: Use the after_request decorator to set Access-Control-Allow
-  '''
+  @app.after_request
+  def after_request(response):
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, DELETE')
+    return response
 
   '''
   @TODO: 
@@ -28,18 +27,51 @@ def create_app(test_config=None):
   '''
 
 
-  '''
-  @TODO: 
-  Create an endpoint to handle GET requests for questions, 
-  including pagination (every 10 questions). 
-  This endpoint should return a list of questions, 
-  number of total questions, current category, categories. 
+  @app.route('/questions', methods=['GET'])
+  def get_questions():
+    page = request.args.get('page', 1, type=int)
+    
+    questions = Question.query.all()
+    
+    total_questions = len(questions)
+    processed_questions = process_questions(questions, page)
 
-  TEST: At this point, when you start the application
-  you should see questions and categories generated,
-  ten questions per page and pagination at the bottom of the screen for three pages.
-  Clicking on the page numbers should update the questions. 
-  '''
+    if len(processed_questions) == 0:
+      abort(404)
+
+    categories = Category.query.all()
+
+    formatted_categories = {}
+    for category in categories:
+      formatted_categories[category.id] = category.type
+
+    data = {
+      'success': True,
+      'questions': processed_questions,
+      'total_questions': total_questions,
+      'categories': formatted_categories,
+      'current_category': None
+    }
+
+    return jsonify(data)
+
+  def process_questions(questions, page):
+    sliced_questions = slice_questions(questions, page)
+    return format_questions(sliced_questions)
+
+  def slice_questions(questions, page):
+    end = page * QUESTIONS_PER_PAGE
+    start = end - QUESTIONS_PER_PAGE
+    return questions[start:end]
+  
+
+  def format_questions(questions):
+    formatted_questions = []
+    for question in questions:
+      formatted_questions.append(question.format())
+    
+    return formatted_questions
+
 
   '''
   @TODO: 
@@ -98,6 +130,13 @@ def create_app(test_config=None):
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
+  @app.errorhandler(404)
+  def not_found(error):
+    return jsonify({
+      'success': False,
+      'error': 404,
+      'message': 'Not found'
+    }), 404
   
   return app
 

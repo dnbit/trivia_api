@@ -20,12 +20,23 @@ def create_app(test_config=None):
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, DELETE')
     return response
 
-  '''
-  @TODO: 
-  Create an endpoint to handle GET requests 
-  for all available categories.
-  '''
 
+  @app.route('/categories', methods=['GET'])
+  def get_categories():
+    categories = Category.query.all()
+    
+    if not categories:
+      abort(404)
+
+    formatted_categories = format_categories(categories)
+    
+    data = {
+      'success': True,
+      'categories': formatted_categories,
+    }
+
+    return jsonify(data)
+    
 
   @app.route('/questions', methods=['GET'])
   def get_questions():
@@ -36,14 +47,11 @@ def create_app(test_config=None):
     total_questions = len(questions)
     processed_questions = process_questions(questions, page)
 
-    if len(processed_questions) == 0:
+    if not processed_questions:
       abort(404)
 
     categories = Category.query.all()
-
-    formatted_categories = {}
-    for category in categories:
-      formatted_categories[category.id] = category.type
+    formatted_categories = format_categories(categories)
 
     data = {
       'success': True,
@@ -72,6 +80,12 @@ def create_app(test_config=None):
     
     return formatted_questions
 
+  def format_categories(categories):
+    formatted_categories = {}
+    for category in categories:
+      formatted_categories[category.id] = category.type
+    
+    return formatted_categories
 
   '''
   @TODO: 

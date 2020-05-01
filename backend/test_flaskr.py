@@ -33,10 +33,12 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
+    # Get Questions tests
     def test_get_questions_first_page(self):
         res = self.client().get('/questions')
         data = json.loads(res.data)
 
+        self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
         self.assertEqual(len(data['questions']), 10)
         self.assertEqual(data['total_questions'], 19)
@@ -45,14 +47,26 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get('/questions?page=2')
         data = json.loads(res.data)
 
+        self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
         self.assertEqual(len(data['questions']), 9)
         self.assertEqual(data['total_questions'], 19)
 
     def test_404_get_questions_beyond_valid_page(self):
         res = self.client().get('/questions?page=10')
+        data = json.loads(res.data)
 
+        self.assertFalse(data['success'])
         self.assertEqual(res.status_code, 404)
+
+    # Get Categories tests
+    def test_get_categories(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+        
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

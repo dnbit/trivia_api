@@ -15,6 +15,7 @@ def create_app(test_config=None):
   setup_db(app)
   CORS(app)
 
+
   @app.after_request
   def after_request(response):
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
@@ -64,9 +65,11 @@ def create_app(test_config=None):
 
     return jsonify(result)
 
+
   def process_questions(questions, page):
     sliced_questions = slice_questions(questions, page)
     return format_questions(sliced_questions)
+
 
   def slice_questions(questions, page):
     end = page * QUESTIONS_PER_PAGE
@@ -80,6 +83,7 @@ def create_app(test_config=None):
       formatted_questions.append(question.format())
     
     return formatted_questions
+
 
   def format_categories(categories):
     formatted_categories = {}
@@ -232,6 +236,7 @@ def create_app(test_config=None):
       'message': 'Bad request'
     }), 400
 
+
   @app.errorhandler(404)
   def not_found(error):
     return jsonify({
@@ -239,6 +244,7 @@ def create_app(test_config=None):
       'error': 404,
       'message': 'Not found'
     }), 404
+
 
   @app.errorhandler(422)
   def not_found(error):

@@ -134,25 +134,45 @@ def create_app(test_config=None):
     return jsonify(result)
 
 
-  '''
-  @TODO: 
-  Create a POST endpoint to get questions based on a search term. 
-  It should return any questions for whom the search term 
-  is a substring of the question. 
+  @app.route('/questions/search', methods=['POST'])
+  def search_question():
+    body = json.loads(request.data)
 
-  TEST: Search by any phrase. The questions list will update to include 
-  only question that include that string within their question. 
-  Try using the word "title" to start. 
-  '''
+    if not body:
+      abort(400)
 
-  '''
-  @TODO: 
-  Create a GET endpoint to get questions based on category. 
+    print(body)
 
-  TEST: In the "List" tab / main screen, clicking on one of the 
-  categories in the left column will cause only questions of that 
-  category to be shown. 
-  '''
+    page = request.args.get('page', 1, type=int)
+
+    search_term = ''
+    try:
+      search_term = body['search_term']
+    except:
+      abort(400)
+      
+    questions = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
+    
+    total_questions = len(questions)
+    processed_questions = process_questions(questions, page)
+
+    if not processed_questions:
+      abort(404)
+
+    categories = Category.query.all()
+    formatted_categories = format_categories(categories)
+
+    result = {
+      'success': True,
+      'questions': processed_questions,
+      'total_questions': total_questions,
+      'categories': formatted_categories,
+      'current_category': None
+    }
+
+    return jsonify(result)
+
+
   @app.route('/categories/<int:category_id>/questions', methods=['GET'])
   def get_questiosn_by_category(category_id):  
     page = request.args.get('page', 1, type=int)

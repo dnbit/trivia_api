@@ -3,6 +3,7 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
+import json
 
 from models import setup_db, Question, Category
 
@@ -87,17 +88,9 @@ def create_app(test_config=None):
     
     return formatted_categories
 
-  '''
-  @TODO: 
-  Create an endpoint to DELETE question using a question ID. 
 
-  TEST: When you click the trash icon next to a question, the question will be removed.
-  This removal will persist in the database and when you refresh the page. 
-  '''
   @app.route('/questions/<int:question_id>', methods=['DELETE'])
   def delete_question(question_id):
-    print(question_id)
-
     question = Question.query.get(question_id)
 
     if not question:
@@ -116,16 +109,30 @@ def create_app(test_config=None):
     return jsonify(result)
 
 
-  '''
-  @TODO: 
-  Create an endpoint to POST a new question, 
-  which will require the question and answer text, 
-  category, and difficulty score.
+  @app.route('/questions', methods=['POST'])
+  def create_new_question():
+    body = json.loads(request.data)
 
-  TEST: When you submit a question on the "Add" tab, 
-  the form will clear and the question will appear at the end of the last page
-  of the questions list in the "List" tab.  
-  '''
+    if not body:
+      abort(400)
+
+    question = body['question']
+    answer = body['answer']
+    difficulty = body['difficulty']
+    category = body['category']
+
+    new_question = Question(question=question, answer=answer, 
+                            difficulty=difficulty, category=category)
+
+    new_question.insert()
+
+    result = {
+      "success": True,
+      "item": new_question.format()
+    }
+
+    return jsonify(result)
+
 
   '''
   @TODO: 
@@ -160,11 +167,15 @@ def create_app(test_config=None):
   and shown whether they were correct or not. 
   '''
 
-  '''
-  @TODO: 
-  Create error handlers for all expected errors 
-  including 404 and 422. 
-  '''
+
+  @app.errorhandler(400)
+  def not_found(error):
+    return jsonify({
+      'success': False,
+      'error': 400,
+      'message': 'Bad request'
+    }), 400
+
   @app.errorhandler(404)
   def not_found(error):
     return jsonify({
@@ -181,6 +192,5 @@ def create_app(test_config=None):
       'message': 'Unprocessable Entity'
     }), 422
   
-  return app
 
-    
+  return app

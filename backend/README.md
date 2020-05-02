@@ -52,20 +52,6 @@ Setting the `FLASK_ENV` variable to `development` will detect file changes and r
 
 Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` directory and the `__init__.py` file to find the application. 
 
-## Tasks
-
-One note before you delve into your tasks: for each endpoint you are expected to define the endpoint and response data. The frontend will be a plentiful resource because it is set up to expect certain endpoints and response data formats already. You should feel free to specify endpoints in your own way; if you do so, make sure to update the frontend or you will get some unexpected behavior. 
-
-1. Use Flask-CORS to enable cross-domain requests and set response headers. 
-2. Create an endpoint to handle GET requests for questions, including pagination (every 10 questions). This endpoint should return a list of questions, number of total questions, current category, categories. 
-3. Create an endpoint to handle GET requests for all available categories. 
-4. Create an endpoint to DELETE question using a question ID. 
-5. Create an endpoint to POST a new question, which will require the question and answer text, category, and difficulty score. 
-6. Create a POST endpoint to get questions based on category. 
-7. Create a POST endpoint to get questions based on a search term. It should return any questions for whom the search term is a substring of the question. 
-8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
-9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
-
 REVIEW_COMMENT
 ```
 This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
@@ -89,7 +75,6 @@ GET '/categories'
 
 ```
 
-
 ## Testing
 To run the tests, run
 ```
@@ -98,3 +83,212 @@ createdb trivia_test
 psql trivia_test < trivia.psql
 python test_flaskr.py
 ```
+
+## API Documentation
+
+### List of endpoints
+
+[GET '/categories'](#get_categories)
+
+[GET '/questions?page={page_number}'](#get_questions)
+
+[DELETE '/questions/{id}'](#delete_questions)
+
+[POST '/questions'](#post_questions)
+
+[POST '/questions/search'](#search_questions)
+
+[GET '/categories/{id}/questions'](#get_question_by_category)
+
+[POST '/quizzes'](#post_quizzes)
+
+### Endpoints details
+
+<a name="get_categories"></a>GET '/categories'
+- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+- Request Arguments: None
+- Returns: An object with a success key that contains a boolean and a categories key, that contains a object of id: category_string key:value pairs. 
+```
+{
+    "success": True,
+    "categories": {
+        "1" : "Science",
+        "2" : "Art",
+        "3" : "Geography",
+        "4" : "History",
+        "5" : "Entertainment",
+        "6" : "Sports"
+    }
+}
+```
+
+<a name="get_questions"></a>GET '/questions'
+- Fetches a paginated list of questions
+- Request Arguments: Page number (optional, default = 1)
+- Returns: An object with the sucess result, the list of categories, current category, questions for the given page and total number of questions
+```
+{
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    },
+    "current_category": null,
+    "questions": [
+        {
+            "answer": "Muhammad Ali",
+            "category": 4,
+            "difficulty": 1,
+            "id": 9,
+            "question": "What boxer's original name is Cassius Clay?"
+        },
+        {
+            "answer": "Apollo 13",
+            "category": 5,
+            "difficulty": 4,
+            "id": 2,
+            "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+        }
+    ],
+    "success": true,
+    "total_questions": 20
+}
+```
+
+<a name="delete_questions"></a>DELETE '/questions/{id}'
+- Deletes a question with a given id
+- Request Arguments: Question id
+- Returns: An object with the sucess result and the deleted id
+```
+{
+    "success": True,
+    "deleted": "1"
+}
+```
+
+<a name="post_questions"></a>POST '/questions'
+- Creates a new question
+- Request Arguments: An object with the question, answer, difficulty and category
+```
+{
+    "question": "What is the symbol for Silver?",
+    "answer": "Ag",
+    "difficulty": "1",
+    "category": "1"
+}
+```
+- Returns: An object with the sucess result and the new question
+```
+{
+    "item": {
+        "answer": "Ag",
+        "category": "1",
+        "difficulty": "1",
+        "id": "25",
+        "question": "What is the symbol for Silver?"
+    },
+    "success": true
+}
+```
+
+<a name="search_questions"></a>POST '/questions/search'
+- Search questions that include a given term
+- Request Arguments: An object with the search term
+```
+{
+    "search_term": "title"
+}
+```
+- Returns: An object with the sucess result, list of categories, current category, matching questions and total number of matching questions
+```
+{
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    },
+    "current_category": null,
+    "questions": [
+        {
+            "answer": "Edward Scissorhands",
+            "category": 5,
+            "difficulty": 3,
+            "id": 6,
+            "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+        }
+    ],
+    "success": true,
+    "total_questions": 1
+}
+```
+
+
+<a name="get_question_by_category"></a>GET '/categories/{id}/questions'
+- Fetches questions for a given category
+- Request Arguments: Category id
+-  Returns: An object with the sucess result, the list of categories, current category, questions for the given page and total number of questions for that category
+```
+{
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    },
+    "current_category": 1,
+    "questions": [
+        {
+            "answer": "Muhammad Ali",
+            "category": 4,
+            "difficulty": 1,
+            "id": 9,
+            "question": "What boxer's original name is Cassius Clay?"
+        },
+        {
+            "answer": "Apollo 13",
+            "category": 5,
+            "difficulty": 4,
+            "id": 2,
+            "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+        }
+    ],
+    "success": true,
+    "total_questions": 20
+}
+```
+
+<a name="post_quizzes"></a>POST '/quizzes'
+- Fetches the next question for the quizz
+- Request Arguments: An object with the list of previous questions used and the category.
+```
+{
+	"previous_questions": [25],
+    "quiz_category": {
+    	"id": "1"
+    	
+    }
+}
+```
+- Returns: An object with the sucess result and the next question
+```
+{
+    "question": {
+        "answer": "The Liver",
+        "category": 1,
+        "difficulty": 4,
+        "id": 20,
+        "question": "What is the heaviest organ in the human body?"
+    },
+    "success": true
+}
+```
+
+

@@ -31,12 +31,12 @@ def create_app(test_config=None):
 
     formatted_categories = format_categories(categories)
     
-    data = {
+    result = {
       'success': True,
       'categories': formatted_categories,
     }
 
-    return jsonify(data)
+    return jsonify(result)
 
 
   @app.route('/questions', methods=['GET'])
@@ -54,7 +54,7 @@ def create_app(test_config=None):
     categories = Category.query.all()
     formatted_categories = format_categories(categories)
 
-    data = {
+    result = {
       'success': True,
       'questions': processed_questions,
       'total_questions': total_questions,
@@ -62,7 +62,7 @@ def create_app(test_config=None):
       'current_category': None
     }
 
-    return jsonify(data)
+    return jsonify(result)
 
   def process_questions(questions, page):
     sliced_questions = slice_questions(questions, page)
@@ -153,6 +153,30 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+  @app.route('/categories/<int:category_id>/questions', methods=['GET'])
+  def get_questiosn_by_category(category_id):  
+    page = request.args.get('page', 1, type=int)
+    
+    questions = Question.query.filter_by(category = category_id).all()
+    
+    total_questions = len(questions)
+    processed_questions = process_questions(questions, page)
+
+    if not processed_questions:
+      abort(404)
+
+    categories = Category.query.all()
+    formatted_categories = format_categories(categories)
+
+    result = {
+      'success': True,
+      'questions': processed_questions,
+      'total_questions': total_questions,
+      'categories': formatted_categories,
+      'current_category': category_id
+    }
+
+    return jsonify(result)
 
 
   '''

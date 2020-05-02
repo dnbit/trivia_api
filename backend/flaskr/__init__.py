@@ -113,18 +113,19 @@ def create_app(test_config=None):
   def create_new_question():
     body = json.loads(request.data)
 
-    if not body:
+    new_question = None
+    try:
+      question = body['question']
+      answer = body['answer']
+      difficulty = body['difficulty']
+      category = body['category']
+
+      new_question = Question(question=question, answer=answer, 
+                              difficulty=difficulty, category=category)
+
+      new_question.insert()
+    except:
       abort(400)
-
-    question = body['question']
-    answer = body['answer']
-    difficulty = body['difficulty']
-    category = body['category']
-
-    new_question = Question(question=question, answer=answer, 
-                            difficulty=difficulty, category=category)
-
-    new_question.insert()
 
     result = {
       "success": True,
@@ -137,12 +138,6 @@ def create_app(test_config=None):
   @app.route('/questions/search', methods=['POST'])
   def search_question():
     body = json.loads(request.data)
-
-    if not body:
-      abort(400)
-
-    print(body)
-
     page = request.args.get('page', 1, type=int)
 
     search_term = ''
@@ -199,17 +194,34 @@ def create_app(test_config=None):
     return jsonify(result)
 
 
-  '''
-  @TODO: 
-  Create a POST endpoint to get questions to play the quiz. 
-  This endpoint should take category and previous question parameters 
-  and return a random questions within the given category, 
-  if provided, and that is not one of the previous questions. 
+  @app.route('/quizzes', methods=['POST'])
+  def play_quizz():
+    body = json.loads(request.data)
 
-  TEST: In the "Play" tab, after a user selects "All" or a category,
-  one question at a time is displayed, the user is allowed to answer
-  and shown whether they were correct or not. 
-  '''
+    next_question = {}
+    try:
+      previous_questions = body['previous_questions']
+      quiz_category = body['quiz_category']['id']
+
+      questions = []
+      if quiz_category != 0:
+        questions = Question.query.filter_by(category = quiz_category).all()
+      else:
+        questions = Question.query.all()
+
+      for question in questions:
+        if question.id not in previous_questions:
+          next_question = question.format()
+          break
+    except:
+      abort(400)
+    
+    result = {
+      'success': True,
+      'question': next_question
+    }
+
+    return jsonify(result)
 
 
   @app.errorhandler(400)

@@ -29,10 +29,7 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    """
-    TODO
-    Write at least one test for each test for successful operation and for expected errors.
-    """
+
     # Get Questions tests
     def test_get_questions_first_page(self):
         res = self.client().get('/questions')
@@ -124,7 +121,37 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
+    
+    def test_400_search_questions_wrong_body(self):
+        body = {}
+        res = self.client().post('/questions/search', json = body)
+        data = json.loads(res.data)
 
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 400)
+
+
+    def test_play_quizz(self):
+        body = {
+            "previous_questions": [],
+            "quiz_category": {
+    	        "id": "1"
+            }
+        }
+        res = self.client().post('/quizzes', json = body)
+        data = json.loads(res.data)
+
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_400_play_quiz_wrong_body(self):
+        body = {}
+        res = self.client().post('/quizzes', json = body)
+        data = json.loads(res.data)
+
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 400)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

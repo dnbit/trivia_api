@@ -29,11 +29,129 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    """
-    TODO
-    Write at least one test for each test for successful operation and for expected errors.
-    """
 
+    # Get Questions tests
+    def test_get_questions_first_page(self):
+        res = self.client().get('/questions')
+        data = json.loads(res.data)
+
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(data['questions']), 10)
+
+
+    def test_404_get_questions_beyond_valid_page(self):
+        res = self.client().get('/questions?page=10')
+        data = json.loads(res.data)
+
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 404)
+
+
+    # Get Categories tests
+    def test_get_categories(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_delete_question(self):
+        res = self.client().delete('/questions/5')
+        data = json.loads(res.data)
+
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_404_delete_question_not_exists(self):
+        res = self.client().delete('/questions/100')
+        data = json.loads(res.data)
+
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 404)
+
+
+    def test_create_new_question(self):
+        body = {
+            "question": "What is the symbol for Silver?",
+            "answer": "Ag",
+            "difficulty": "1",
+            "category": "1"
+        }
+        res = self.client().post('/questions', json = body)
+        data = json.loads(res.data)
+
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_400_create_new_question_bad_request(self):
+        body = {}
+        res = self.client().post('/questions', json = body)
+        data = json.loads(res.data)
+
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 400)
+    
+
+    def test_get_question_by_category(self):
+        res = self.client().get('/categories/1/questions')
+        data = json.loads(res.data)
+
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_404_get_question_by_category_not_exists(self):
+        res = self.client().get('/category/100/questions')
+        data = json.loads(res.data)
+
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 404)
+
+
+    def test_search_questions(self):
+        body = {
+            "search_term": "title"
+        }
+        res = self.client().post('/questions/search', json = body)
+        data = json.loads(res.data)
+
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+    
+    def test_400_search_questions_wrong_body(self):
+        body = {}
+        res = self.client().post('/questions/search', json = body)
+        data = json.loads(res.data)
+
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 400)
+
+
+    def test_play_quizz(self):
+        body = {
+            "previous_questions": [],
+            "quiz_category": {
+    	        "id": "1"
+            }
+        }
+        res = self.client().post('/quizzes', json = body)
+        data = json.loads(res.data)
+
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_400_play_quiz_wrong_body(self):
+        body = {}
+        res = self.client().post('/quizzes', json = body)
+        data = json.loads(res.data)
+
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 400)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
